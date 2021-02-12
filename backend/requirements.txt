@@ -1,0 +1,5 @@
+flask
+requests
+flask-mysql
+cerberus
+flask_cors

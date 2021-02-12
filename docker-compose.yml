@@ -1,0 +1,44 @@
+version: "3.9"
+
+services:
+  # database service
+  db:
+    container_name: smartsigi_db
+    image: mariadb:10.5
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpw
+      MYSQL_DATABASE: smartsigi
+      MYSQL_USER: smartsigiUser
+      MYSQL_PASSWORD: smartsigiUserPassword
+    volumes: 
+      - ./db/smartsigi_db_init.sql:/docker-entrypoint-initdb.d/init.sql
+
+  # adminer for db gui
+  adminer: 
+    image: adminer:latest 
+    container_name: adminer
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+    restart: always
+    ports:
+      - 3307:8080
+  # flask backend
+  backend:
+    build: ./backend
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backend:/app
+
+  # frontend pwa
+  web:
+    build: ./web
+    network_mode: host
+    volumes:
+      - ./web:/app
+
+
+
+
