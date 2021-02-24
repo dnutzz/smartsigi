@@ -4,7 +4,7 @@ smart home application for viewing various sensor data within the local network
 ## Description
 todo: sensor setup mit rasp beschreiben
 
-A small flask backend then serves as a connector for a progressive web app, which is accessible within the local network.
+A small flask backend then serves as a connector for a mobile app, which is accessible within the local network.
 ## Requirements
 - docker
 

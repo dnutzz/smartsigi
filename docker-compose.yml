@@ -3,7 +3,6 @@ version: "3.9"
 services:
   # database service
   db:
-    container_name: smartsigi_db
     image: mariadb:10.5
     ports:
       - 3306:3306
@@ -26,19 +25,20 @@ services:
       - 3307:8080
   # flask backend
   backend:
+    container_name: flask_backend
     build: ./backend
     ports:
-      - "5000:5000"
+      - 5000:5000
     volumes:
       - ./backend:/app
 
   # frontend pwa
-  web:
-    build: ./web
-    network_mode: host
-    volumes:
-      - ./web:/app
-
-
+  #web:
+  #  container_name: web_pwa
+  #  build: ./web
+ #   volumes:
+#      - ./web:/app
+#    ports:
+#      - 3000:3000
 
 
