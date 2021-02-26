@@ -34,6 +34,14 @@ CREATE TABLE `custom_labels` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
+DROP TABLE IF EXISTS `labels`;
+CREATE TABLE `labels` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `label_id` text NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
 DROP TABLE IF EXISTS `snapshots`;
 CREATE TABLE `snapshots` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
