@@ -3,3 +3,5 @@ requests
 flask-mysql
 cerberus
 flask_cors
+flask-socketio
+eventlet
