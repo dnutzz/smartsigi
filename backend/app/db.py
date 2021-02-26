@@ -48,15 +48,15 @@ def getTempTrendByLabelId(mysql, label_id):
     cursor = mysql.get_db().cursor()
     intervals = [12, 6, 2]
     for interval in intervals:
-        cursor.execute('''SELECT temp, `datetime`  FROM snapshots WHERE label_id =%s AND `datetime` > DATE_SUB(NOW(),INTERVAL %s HOUR) ORDER BY id DESC;''', (label_id,interval ))
+        cursor.execute('''SELECT temp, `datetime` FROM snapshots WHERE label_id =%s AND `datetime` > DATE_SUB(NOW(),INTERVAL %s HOUR) ORDER BY id DESC;''', (label_id,interval ))
         res = cursor.fetchall()
         for row in res:
             ret[f'{interval}h'].append(row[0])
     return ret
 
-def addAlarm(mysql, label_id, temp, expo_push_token):
+def addAlarm(mysql, label_id, temp, expo_push_token, uid):
     cursor = mysql.get_db().cursor()
-    cursor.execute('''INSERT INTO alarms(label_id, temp, expo_push_token, datetime, notified) VALUES(%s, %s, %s, now(), 0);''', (label_id, temp, expo_push_token))
+    cursor.execute('''INSERT INTO alarms(uid, label_id, temp, expo_push_token, datetime, notified) VALUES(%s, %s, %s, %s, now(), 0);''', (uid, label_id, temp, expo_push_token))
     cursor.execute('''SELECT LAST_INSERT_ID();''')
     res = cursor.fetchone()
     mysql.get_db().commit()
@@ -64,10 +64,10 @@ def addAlarm(mysql, label_id, temp, expo_push_token):
 
 def getAlarmByLabelId(mysql, label_id):
     cursor = mysql.get_db().cursor()
-    cursor.execute('''SELECT temp, expo_push_token, notified FROM alarms WHERE label_id=%s ORDER BY datetime DESC;''', (label_id, ))
+    cursor.execute('''SELECT temp, expo_push_token, notified, uid FROM alarms WHERE label_id=%s ORDER BY datetime DESC;''', (label_id, ))
     res = cursor.fetchone()
     if(res):
-        return {"temp": res[0], "expo_push_token": res[1], "notified": res[2]}
+        return {"temp": res[0], "expo_push_token": res[1], "notified": res[2], "uid": res[3]}
     else:
         return None;
 
@@ -81,3 +81,22 @@ def removeAlarmByLabelIdAndToken(mysql, label_id, expo_push_token):
     cursor.execute('''DELETE FROM alarms WHERE (label_id=%s AND expo_push_token=%s);''', (label_id, expo_push_token, ))
     mysql.get_db().commit()
   
+def addCustomLabelName(mysql, label_id, uid, custom_label_name):
+    cursor = mysql.get_db().cursor()
+    cursor.execute('''INSERT INTO custom_labels(label_id, uid, custom_label_name) VALUES(%s, %s, %s);''', (label_id, uid, custom_label_name))
+    cursor.execute('''SELECT LAST_INSERT_ID();''')
+    res = cursor.fetchone()
+    mysql.get_db().commit()
+    return res[0]
+
+def getCustomLabelName(mysql, label_id, uid):
+    cursor = mysql.get_db().cursor()
+    cursor.execute('''SELECT custom_label_name FROM custom_labels WHERE label_id=%s AND uid=%s ORDER BY id DESC;''', (label_id,uid))
+    res = cursor.fetchone()
+    if(res):
+        return res[0]
+    return None;
+    
+
+
+
