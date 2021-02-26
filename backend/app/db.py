@@ -83,11 +83,18 @@ def removeAlarmByLabelIdAndToken(mysql, label_id, expo_push_token):
   
 def addCustomLabelName(mysql, label_id, uid, custom_label_name):
     cursor = mysql.get_db().cursor()
-    cursor.execute('''INSERT INTO custom_labels(label_id, uid, custom_label_name) VALUES(%s, %s, %s);''', (label_id, uid, custom_label_name))
-    cursor.execute('''SELECT LAST_INSERT_ID();''')
+    cursor.execute('''SELECT id from custom_labels WHERE (label_id=%s AND uid=%s);''',(label_id, uid,))
     res = cursor.fetchone()
-    mysql.get_db().commit()
-    return res[0]
+    if res:
+        cursor.execute('''UPDATE custom_labels SET custom_label_name=%s WHERE (label_id=%s AND uid=%s);''', (custom_label_name, label_id,uid ))
+        mysql.get_db().commit()
+        return "Updated"
+    else:    
+        cursor.execute('''INSERT INTO custom_labels(label_id, uid, custom_label_name) VALUES(%s, %s, %s);''', (label_id, uid, custom_label_name))
+        cursor.execute('''SELECT LAST_INSERT_ID();''')
+        res = cursor.fetchone()
+        mysql.get_db().commit()
+        return res[0]
 
 def getCustomLabelName(mysql, label_id, uid):
     cursor = mysql.get_db().cursor()
@@ -97,6 +104,12 @@ def getCustomLabelName(mysql, label_id, uid):
         return res[0]
     return None;
     
-
-
+def getCustomLabelsByUid(mysql, uid):
+    cursor = mysql.get_db().cursor()
+    ret = {}
+    cursor.execute('''SELECT label_id, custom_label_name FROM custom_labels WHERE uid=%s ORDER BY id DESC;''', (uid))
+    res = cursor.fetchall()
+    for row in res:
+        ret[row[0]] = row[1]
+    return ret
 

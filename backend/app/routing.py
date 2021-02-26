@@ -54,9 +54,6 @@ def getTempTrendByLabelId(label_id):
     except ValueError as e:
         return make_response(Response(), 500)
 
-
-
-
 # Returns array of distinct label_ids
 @app.route("/api/getDistinctLabelIds", methods=['GET'])
 def getDistinctLabelIds():
@@ -204,3 +201,11 @@ def addCustomLabelName():
         return make_response(Response("Label renamed."), 201)
     except ValueError as e:
         return make_response(Response("Could not save data."), 400)
+
+@app.route("/api/getCustomLabelsByUid/<uid>", methods=['GET'])
+def getCustomLabelsByUid(uid):
+    try:
+        ret_custom_labels = db.getCustomLabelsByUid(mysql, uid)
+        return jsonify(ret_custom_labels)
+    except ValueError as e:
+        return make_response(Response(), 500)
