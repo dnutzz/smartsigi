@@ -3,7 +3,7 @@ import datetime
 def getDistinctLabelIds(mysql):
     arr = []
     cursor = mysql.get_db().cursor()
-    cursor.execute('''SELECT DISTINCT label_id FROM snapshots''')
+    cursor.execute('''SELECT label_id FROM labels;''')
     rows = cursor.fetchall()
     for row in rows:
         arr.append(row[0])
@@ -30,7 +30,10 @@ def getLastSnapshotByLabelId(mysql, label_id):
     cursor = mysql.get_db().cursor()
     cursor.execute('''SELECT temp, datetime FROM snapshots WHERE label_id=%s ORDER BY datetime DESC;''', (label_id, ))
     res = cursor.fetchone()
-    return {"temp": res[0], "datetime": res[1]}
+    if(res):
+        return {"temp": res[0], "datetime": res[1]}
+    else:
+        return None
 
 def getBasicInfos(mysql):
     labels = getDistinctLabelIds(mysql)
@@ -39,19 +42,21 @@ def getBasicInfos(mysql):
     for label in labels:
         cursor.execute('''SELECT label_id, temp, datetime  FROM snapshots WHERE label_id=%s ORDER BY datetime DESC;''', (label, ))
         res = cursor.fetchone()
-        arr.append({"label_id": res[0], "temp": res[1], "datetime": res[2]})
+        if(res):
+            arr.append({"label_id": res[0], "temp": res[1], "datetime": res[2]})
     return arr
 
 def getTempTrendByLabelId(mysql, label_id):
-    labels = getDistinctLabelIds(mysql)
-    ret = {"12h": [], "6h": [], "2h": []}
+    # ret = {"12h": [], "6h": [], "2h": []}
+    ret = {"1h": []}
     cursor = mysql.get_db().cursor()
-    intervals = [12, 6, 2]
+    intervals = [1]
     for interval in intervals:
         cursor.execute('''SELECT temp, `datetime` FROM snapshots WHERE label_id =%s AND `datetime` > DATE_SUB(NOW(),INTERVAL %s HOUR) ORDER BY id DESC;''', (label_id,interval ))
         res = cursor.fetchall()
-        for row in res:
-            ret[f'{interval}h'].append(row[0])
+        if res:
+            for row in res:
+                ret[f'{interval}h'].append(row[0])
     return ret
 
 def addAlarm(mysql, label_id, temp, expo_push_token, uid):
@@ -113,3 +118,10 @@ def getCustomLabelsByUid(mysql, uid):
         ret[row[0]] = row[1]
     return ret
 
+def addLabel(mysql, label_id):
+    cursor = mysql.get_db().cursor()
+    cursor.execute('''INSERT INTO labels(label_id) VALUES(%s);''', (label_id,))
+    cursor.execute('''SELECT LAST_INSERT_ID();''')
+    res = cursor.fetchone()
+    mysql.get_db().commit()
+    return res[0]

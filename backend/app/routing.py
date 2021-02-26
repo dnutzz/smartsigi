@@ -209,3 +209,22 @@ def getCustomLabelsByUid(uid):
         return jsonify(ret_custom_labels)
     except ValueError as e:
         return make_response(Response(), 500)
+
+@app.route("/api/addLabel", methods=['POST'])
+def addLabel():
+    schema = {
+        'label_id': {
+            'type': 'string',
+            'required': True
+        }
+    }
+    v = Validator(schema)
+    data = request.get_json()
+    if (not v.validate(data)):
+        return make_response(Response("Bad Request"), 400)
+
+    try:
+        res = db.addLabel(mysql, data["label_id"])
+        return make_response(Response("Label added."), 201)
+    except ValueError as e:
+        return make_response(Response("Could not save data."), 400)
